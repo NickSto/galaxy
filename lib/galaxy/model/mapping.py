@@ -152,6 +152,13 @@ model.HistoryDatasetAssociationSubset.table = Table( "history_dataset_associatio
     Column( "history_dataset_association_subset_id", Integer, ForeignKey( "history_dataset_association.id" ), index=True ),
     Column( "location", Unicode(255), index=True) )
 
+model.HistoryDatasetAssociationLabel.table = Table( "history_dataset_association_label", metadata,
+    Column( "id", Integer, primary_key=True ),
+    Column( "hda_id", Integer, ForeignKey( "history_dataset_association.id" ), index=True ),
+    Column( "create_time", DateTime, default=now ),
+    Column( "update_time", DateTime, default=now, onupdate=now ),
+    Column( "label", TrimmedString( 255 ) ) )
+
 model.ImplicitlyConvertedDatasetAssociation.table = Table( "implicitly_converted_dataset_association", metadata,
     Column( "id", Integer, primary_key=True ),
     Column( "create_time", DateTime, default=now ),
@@ -1462,6 +1469,7 @@ simple_mapping( model.HistoryDatasetAssociation,
         primaryjoin=( ( model.HistoryDatasetAssociation.table.c.parent_id == model.HistoryDatasetAssociation.table.c.id ) & ( model.HistoryDatasetAssociation.table.c.visible == True ) ),
         remote_side=[model.HistoryDatasetAssociation.table.c.id] ),
     tags=relation( model.HistoryDatasetAssociationTagAssociation, order_by=model.HistoryDatasetAssociationTagAssociation.table.c.id, backref='history_tag_associations' ),
+    labels=relation( model.HistoryDatasetAssociationLabel, order_by=model.HistoryDatasetAssociationLabel.table.c.id, backref='hda' ),
     annotations=relation( model.HistoryDatasetAssociationAnnotationAssociation, order_by=model.HistoryDatasetAssociationAnnotationAssociation.table.c.id, backref="hdas" ),
     ratings=relation( model.HistoryDatasetAssociationRatingAssociation, order_by=model.HistoryDatasetAssociationRatingAssociation.table.c.id, backref="hdas" ),
     extended_metadata=relation(
@@ -1505,6 +1513,8 @@ mapper( model.HistoryDatasetAssociationSubset, model.HistoryDatasetAssociationSu
                      subset = relation( model.HistoryDatasetAssociation,
                         primaryjoin=( model.HistoryDatasetAssociationSubset.table.c.history_dataset_association_subset_id == model.HistoryDatasetAssociation.table.c.id ) )
                     ) )
+
+simple_mapping( model.HistoryDatasetAssociationLabel )
 
 mapper( model.ImplicitlyConvertedDatasetAssociation, model.ImplicitlyConvertedDatasetAssociation.table,
     properties=dict( parent_hda=relation(

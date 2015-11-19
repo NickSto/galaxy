@@ -2129,6 +2129,11 @@ class HistoryDatasetAssociationSubset( object ):
         self.subset = subset
         self.location = location
 
+class HistoryDatasetAssociationLabel( object ):
+    def __init__(self, hda, label):
+        self.hda = hda
+        self.label = label
+
 class Library( object, Dictifiable, HasName ):
     permitted_actions = get_permitted_actions( filter='LIBRARY' )
     dict_collection_visible_keys = ( 'id', 'name' )
