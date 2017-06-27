@@ -570,6 +570,18 @@ def populate_api_routes( webapp, app ):
                            action='set_communication',
                            conditions=dict( method=["PUT"] ) )
 
+    webapp.mapper.connect( 'get_preference',
+                           '/api/users/{id}/preference/{name}',
+                           controller='users',
+                           action='get_preference',
+                           conditions=dict( method=["GET"] ) )
+
+    webapp.mapper.connect( 'set_preference',
+                           '/api/users/{id}/preference/{name}',
+                           controller='users',
+                           action='set_preference',
+                           conditions=dict( method=["PUT"] ) )
+
     webapp.mapper.connect( 'get_custom_builds',
                            '/api/users/{id}/custom_builds',
                            controller='users',

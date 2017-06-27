@@ -692,6 +692,25 @@ class UserAPIController( BaseAPIController, UsesTagsMixin, CreatesUsersMixin, Cr
         return {'message': message}
 
     @expose_api
+    def get_preference(self, trans, id, name, payload={}, **kwd):
+        """
+        GET /api/users/{id}/preference/{name}
+        """
+        user = self._get_user(trans, id)
+        return user.preferences.get(name)
+
+    @expose_api
+    def set_preference(self, trans, id, name, payload={}, **kwd):
+        """
+        PUT /api/users/{id}/preference/{name}
+        """
+        user = self._get_user(trans, id)
+        value = json.dumps(payload.get('value'))
+        user.preferences[name] = value
+        trans.sa_session.add(user)
+        trans.sa_session.flush()
+
+    @expose_api
     def get_custom_builds(self, trans, id, payload={}, **kwd):
         """
         GET /api/users/{id}/custom_builds

@@ -17,7 +17,15 @@ return Backbone.View.extend({
                     show_note : self.active,
                     note_cls  : self.active && 'fa fa-check'
                 });
-                !self.active && self.frames.hide();
+                // Did the click cause Scratchbook to activate?
+                if ( self.active ) {
+                    // If it's the  user's first time enabling Scratchbook,
+                    // show a window explaing what it is.
+                    //TODO: Don't make another copy if this window is already open.
+                    self._showWelcome( self );
+                } else {
+                    self.frames.hide()
+                };
             },
             onbeforeunload  : function() {
                 if ( self.frames.length() > 0 ) {
@@ -42,6 +50,53 @@ return Backbone.View.extend({
             self.buttonLoad.set( { 'toggle': this.visible, 'icon': this.visible && 'fa-eye' || 'fa-eye-slash' } );
         });
         this.history_cache = {};
+    },
+
+    /** Show a Scratchbook window explaining what Scratchbook is. */
+    _showWelcome: function( self ) {
+        $.ajax({
+            url : Galaxy.root + 'api/users/' + Galaxy.user.id + '/preference/Scratchbook.show_welcome',
+            type: 'GET'
+        }).done( function( response ) {
+            var show_welcome = JSON.parse(response);
+            if ( show_welcome ) {
+                self.frames.add({
+                    title: 'Scratchbook first time',
+                    content: self._makeWelcome()
+                });
+            }
+        });
+    },
+
+    /** Construct the Scratchbook welcome window explanatory content. */
+    _makeWelcome: function() {
+        var html = ([
+            '<div>',
+                'This is a Scratchbook window!',
+            '</div>',
+            '<div>',
+                'You clicked the <i class="fa fa-th"></i> icon, which enables Scratchbook. This ',
+                'allows windows like this to open. If you\'d like to stop using Scratchbook, just ',
+                'click the icon again.',
+            '</div>',
+            '<div>',
+                '<a class="btn btn-primary btn-md scratchbook-dont-show" target="_blank">',
+                'Don\'t show me this again</a>',
+            '</div>',
+        ].join(''))
+        var content = $( '<div>', {class: 'scratchbook-content container'} );
+        content.html(html);
+        var button = content.find('.scratchbook-dont-show');
+        // Implement the "Don't show this again" button functionality by setting the "show_welcome"
+        // user preference to false.
+        button.click(function() {
+            $.ajax({
+                url: Galaxy.root + 'api/users/' + Galaxy.user.id + '/preference/Scratchbook.show_welcome',
+                type: 'PUT',
+                data: {'value': false}
+            })
+        })
+        return content;
     },
 
     /** Add a dataset to the frames */
